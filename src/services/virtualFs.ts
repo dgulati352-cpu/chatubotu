@@ -32,7 +32,7 @@ export class VirtualFileSystem {
     return this.files.get(path);
   }
 
-  public writeFile(path: string, content: string, generatedBy: 'frontend' | 'backend' | 'architect' | 'database' | 'user' = 'user'): VirtualFile {
+  public writeFile(path: string, content: string, generatedBy: 'frontend' | 'backend' | 'architect' | 'database' | 'reviewer' | 'user' = 'user'): VirtualFile {
     const existing = this.files.get(path);
     const language = this.detectLanguage(path);
     const module = this.detectModule(path);

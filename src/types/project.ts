@@ -23,7 +23,7 @@ export interface VirtualFile {
   language: FileLanguage;
   module: 'frontend' | 'backend' | 'database' | 'shared' | 'config' | 'root';
   isModified?: boolean;
-  generatedBy?: 'frontend' | 'backend' | 'architect' | 'database' | 'user';
+  generatedBy?: 'frontend' | 'backend' | 'architect' | 'database' | 'reviewer' | 'user';
   lastModified: number;
 }
 

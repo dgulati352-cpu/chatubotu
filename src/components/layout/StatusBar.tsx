@@ -1,93 +1,109 @@
 import React from 'react';
-import { 
-  Bot, 
-  GitBranch, 
-  Database, 
-  CheckCircle2, 
-  Layers, 
-  Cpu, 
-  Terminal as TerminalIcon,
-  Wifi
+import {
+  GitBranch,
+  RotateCw,
+  XCircle,
+  AlertTriangle,
+  Radio,
+  CheckCircle,
+  Cpu,
+  Bot,
+  Sparkles,
+  Terminal as TerminalIcon
 } from 'lucide-react';
 import { useWorkspace } from '../../context/WorkspaceContext';
 
 export const StatusBar: React.FC = () => {
-  const { 
-    agents, 
-    databaseSchema, 
-    githubConfig, 
-    apiContract, 
-    concurrencyMode, 
+  const {
+    activeFile,
+    githubConfig,
     isGenerating,
     isBottomTerminalOpen,
-    setIsBottomTerminalOpen
+    setIsBottomTerminalOpen,
+    selectedModel
   } = useWorkspace();
 
-  const activeAgentsCount = Object.values(agents).filter(a => a.status === 'coding' || a.status === 'thinking' || a.status === 'syncing').length;
+  const lineCount = activeFile ? activeFile.content.split('\n').length : 105;
 
   return (
-    <div className="h-7 bg-[#08090f] border-t border-[#1e2337] px-3 flex items-center justify-between text-[11px] font-mono text-slate-400 select-none z-30">
-      {/* Left: Git Branch & Agents Status */}
-      <div className="flex items-center gap-4">
-        {/* GitHub Branch */}
-        <div className="flex items-center gap-1.5 hover:text-slate-200 cursor-pointer transition">
-          <GitBranch className="w-3.5 h-3.5 text-cyan-400" />
-          <span className="font-semibold text-slate-300">{githubConfig.branch}</span>
-          {githubConfig.isConnected && (
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-          )}
+    <footer className="h-[22px] bg-[#181818] border-t border-[#2b2b2b] px-2 flex items-center justify-between text-[11px] font-sans text-[#858585] select-none z-30">
+      {/* Left items: Git Branch, Sync, Errors/Warnings, Mode, Swarm */}
+      <div className="flex items-center gap-3 h-full">
+        {/* Branch & Sync */}
+        <div className="flex items-center gap-1 hover:text-white cursor-pointer transition">
+          <GitBranch className="w-3.5 h-3.5" />
+          <span className="font-medium text-[#cccccc]">{githubConfig.branch || 'main'}</span>
+          <RotateCw className="w-3 h-3 text-[#858585] ml-0.5" />
         </div>
 
-        <div className="h-3.5 w-[1px] bg-[#1e2337]" />
+        {/* Errors & Warnings count */}
+        <div className="flex items-center gap-1.5 hover:text-white cursor-pointer transition">
+          <div className="flex items-center gap-0.5">
+            <XCircle className="w-3.5 h-3.5" />
+            <span>0</span>
+          </div>
+          <div className="flex items-center gap-0.5">
+            <AlertTriangle className="w-3.5 h-3.5" />
+            <span>0</span>
+          </div>
+        </div>
 
-        {/* Agent Swarm Active */}
-        <div className="flex items-center gap-1.5">
-          <Bot className={`w-3.5 h-3.5 ${isGenerating ? 'text-cyan-400 animate-spin' : 'text-purple-400'}`} />
-          <span>Swarm: </span>
-          <span className={isGenerating ? 'text-cyan-300 font-bold' : 'text-slate-300'}>
-            {isGenerating ? `${activeAgentsCount || 2} Agents Generating...` : '4 Agents Synchronized'}
+        <div className="h-3 w-[1px] bg-[#2b2b2b]" />
+
+        {/* Editor Mode */}
+        <div className="text-[#858585] font-mono text-[10px]">
+          -- NORMAL --
+        </div>
+
+        <div className="h-3 w-[1px] bg-[#2b2b2b]" />
+
+        {/* Multi-Agent Swarm Status */}
+        <div className="flex items-center gap-1.5 text-cyan-400 font-sans">
+          <Sparkles className={`w-3 h-3 ${isGenerating ? 'animate-spin' : ''}`} />
+          <span className="text-[11px]">
+            {isGenerating ? 'Swarm: Synthesizing Code...' : 'Swarm: Ready (Gemini 2.5 + Claude 3.7)'}
           </span>
-        </div>
-
-        <div className="h-3.5 w-[1px] bg-[#1e2337]" />
-
-        {/* Concurrency Indicator */}
-        <div className="flex items-center gap-1 text-[10px]">
-          <span className={`w-2 h-2 rounded-full ${concurrencyMode ? 'bg-emerald-400 shadow-sm shadow-emerald-400' : 'bg-slate-600'}`}></span>
-          <span className="text-slate-400">Dual-Stream: </span>
-          <span className="text-emerald-400 font-bold">{concurrencyMode ? 'Parallel' : 'Sequential'}</span>
         </div>
       </div>
 
-      {/* Right: Database, Contract, Latency, Terminal Toggle */}
-      <div className="flex items-center gap-4">
-        {/* Database Active */}
-        <div className="flex items-center gap-1.5">
-          <Database className="w-3.5 h-3.5 text-emerald-400" />
-          <span className="uppercase text-emerald-400 font-bold">{databaseSchema.type}</span>
-          <span className="text-slate-500">({databaseSchema.models.length} tables)</span>
-        </div>
+      {/* Right items: Ln/Col, Spaces, UTF-8, LF, TypeScript, Feedback, Settings */}
+      <div className="flex items-center gap-3 h-full">
+        <span className="hover:text-white cursor-pointer">
+          Ln {Math.min(105, lineCount)}, Col 1
+        </span>
 
-        <div className="h-3.5 w-[1px] bg-[#1e2337]" />
+        <span className="hover:text-white cursor-pointer">
+          Spaces: 2
+        </span>
 
-        {/* Contract Status */}
-        <div className="flex items-center gap-1.5 text-slate-300">
-          <Layers className="w-3.5 h-3.5 text-blue-400" />
-          <span>Contract: </span>
-          <span className="text-blue-400 font-semibold">{apiContract?.endpoints.length || 4} Routes</span>
-        </div>
+        <span className="hover:text-white cursor-pointer">
+          UTF-8
+        </span>
 
-        <div className="h-3.5 w-[1px] bg-[#1e2337]" />
+        <span className="hover:text-white cursor-pointer">
+          LF
+        </span>
 
-        {/* Telemetry Status */}
+        <span className="hover:text-white cursor-pointer flex items-center gap-1">
+          <span className="text-[#3178c6] font-mono font-bold text-[10px]">{'{}'}</span>
+          <span>{activeFile?.language === 'typescript' || activeFile?.language === 'tsx' ? 'TypeScript' : activeFile?.language || 'TypeScript'}</span>
+        </span>
+
+        <div className="h-3 w-[1px] bg-[#2b2b2b]" />
+
         <button
           onClick={() => setIsBottomTerminalOpen(!isBottomTerminalOpen)}
-          className="flex items-center gap-1 text-slate-400 hover:text-cyan-400 transition"
+          className="flex items-center gap-1 hover:text-white transition"
+          title="Toggle Terminal"
         >
           <TerminalIcon className="w-3 h-3" />
           <span>Terminal</span>
         </button>
+
+        <span className="hover:text-white cursor-pointer text-[10px]">
+          Antigravity - Settings
+        </span>
       </div>
-    </div>
+    </footer>
   );
 };

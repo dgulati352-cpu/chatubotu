@@ -5,11 +5,12 @@ import { DatabaseSchema, DatabaseType } from '../types/database';
 import { GitHubConfig, GitCommit } from '../types/github';
 import { UserProfile, CreditAccount } from '../types/user';
 import { VirtualFileSystem } from '../services/virtualFs';
-import { MultiAgentOrchestrator } from '../services/orchestrator';
+import { MultiAgentOrchestrator, OrchestrationCallbacks } from '../services/orchestrator';
 import { DatabaseEngine } from '../services/databaseEngine';
 import { SimulationEngine } from '../services/simulationEngine';
 import { GitHubService } from '../services/githubService';
 import { AuthCreditService } from '../services/authCreditService';
+import { INITIAL_WORKSPACE_FILES } from '../services/defaultFiles';
 
 export interface TerminalLogEntry {
   id: string;
@@ -18,22 +19,38 @@ export interface TerminalLogEntry {
   level: 'info' | 'success' | 'warn' | 'error' | 'cyan' | 'purple';
 }
 
+export type ActivityTab = 'explorer' | 'search' | 'source-control' | 'debug' | 'extensions' | 'swarm';
+
 export interface WorkspaceContextType {
-  // Google Auth & Auto-Fetched Credits
+  // Layout Panel Toggles
+  isLeftSidebarOpen: boolean;
+  setIsLeftSidebarOpen: (open: boolean) => void;
+  isRightAssistantOpen: boolean;
+  setIsRightAssistantOpen: (open: boolean) => void;
+  isBottomTerminalOpen: boolean;
+  setIsBottomTerminalOpen: (open: boolean) => void;
+
+  // Active Navigation
+  activeActivityTab: ActivityTab;
+  setActiveActivityTab: (tab: ActivityTab) => void;
+  activeMainTab: 'editor' | 'dual-agents' | 'database-studio' | 'live-preview' | 'api-tester';
+  setActiveMainTab: (tab: 'editor' | 'dual-agents' | 'database-studio' | 'live-preview' | 'api-tester') => void;
+
+  // Google Auth & Credits
   user: UserProfile | null;
   credits: CreditAccount;
   loginWithGoogle: (emailOverride?: string) => Promise<void>;
   logout: () => void;
   refreshCredits: () => Promise<void>;
 
-  // Agents State
-  agents: Record<AgentRole, AgentState>;
-  interAgentMessages: InterAgentMessage[];
+  // AI & Swarm
   selectedModel: SupportedAIModel;
   setSelectedModel: (model: SupportedAIModel) => void;
-  isGenerating: boolean;
   concurrencyMode: boolean;
   setConcurrencyMode: (enabled: boolean) => void;
+  isGenerating: boolean;
+  agents: Record<AgentRole, AgentState>;
+  interAgentMessages: InterAgentMessage[];
 
   // Virtual Filesystem & Editor
   vfs: VirtualFileSystem;
@@ -64,18 +81,12 @@ export interface WorkspaceContextType {
   gitCommits: GitCommit[];
   pushToGitHub: (message: string) => Promise<void>;
 
-  // Navigation & UI Panels
-  activeMainTab: 'editor' | 'dual-agents' | 'database-studio' | 'live-preview' | 'api-tester' | 'github-sync';
-  setActiveMainTab: (tab: 'editor' | 'dual-agents' | 'database-studio' | 'live-preview' | 'api-tester' | 'github-sync') => void;
-  activeSideDrawer: 'explorer' | 'agents' | 'database' | 'contract' | 'github' | 'templates' | 'settings';
-  setActiveSideDrawer: (drawer: 'explorer' | 'agents' | 'database' | 'contract' | 'github' | 'templates' | 'settings') => void;
-  isBottomTerminalOpen: boolean;
-  setIsBottomTerminalOpen: (open: boolean) => void;
+  // Terminal & Logs
   terminalLogs: TerminalLogEntry[];
   addTerminalLog: (text: string, level?: 'info' | 'success' | 'warn' | 'error' | 'cyan' | 'purple') => void;
   clearTerminal: () => void;
 
-  // Actions
+  // Swarm Actions
   triggerFullstackBuild: (prompt: string, dbType?: DatabaseType) => Promise<void>;
   loadPresetTemplate: (templateName: string) => void;
 }
@@ -84,59 +95,59 @@ const initialAgents: Record<AgentRole, AgentState> = {
   architect: {
     id: 'architect',
     name: 'Aether Architect',
-    title: 'Lead System & Contract Architect',
+    title: 'Lead System Architect',
     avatar: '📐',
     role: 'architect',
     status: 'idle',
-    currentTask: 'Ready to draft fullstack contracts & lead multi-agent coordination',
+    currentTask: 'Drafting shared TypeScript contracts & PostgreSQL schema',
     color: '#a855f7',
     glowColor: 'rgba(168, 85, 247, 0.4)',
-    model: 'Gemini 2.0 Pro',
+    model: 'Gemini 2.5 Pro',
     steps: [],
     progress: 0,
-    metrics: { filesGenerated: 3, linesOfCode: 120, tokensProcessed: 4200, contractSyncs: 1 }
+    metrics: { filesGenerated: 3, linesOfCode: 140, tokensProcessed: 4200, contractSyncs: 1 }
   },
   frontend: {
     id: 'frontend',
     name: 'Nova UI',
-    title: 'Frontend & UI/UX Specialist',
+    title: 'Frontend UI/UX Specialist',
     avatar: '✨',
     role: 'frontend',
     status: 'idle',
-    currentTask: 'Waiting for contract synchronization to generate React components',
+    currentTask: 'Generating React & Tailwind layout components',
     color: '#00f2fe',
     glowColor: 'rgba(0, 242, 254, 0.4)',
-    model: 'Gemini 2.0 Flash',
+    model: 'Claude 3.7 Sonnet',
     steps: [],
     progress: 0,
-    metrics: { filesGenerated: 4, linesOfCode: 480, tokensProcessed: 8900, contractSyncs: 1 }
+    metrics: { filesGenerated: 4, linesOfCode: 480, tokensProcessed: 6800, contractSyncs: 1 }
   },
   backend: {
     id: 'backend',
     name: 'Vortex API',
-    title: 'Backend & Server Specialist',
+    title: 'Backend Systems Engineer',
     avatar: '⚡',
     role: 'backend',
     status: 'idle',
-    currentTask: 'Standing by to mount Express/FastAPI routes & database connectors',
-    color: '#4facfe',
-    glowColor: 'rgba(79, 172, 254, 0.4)',
-    model: 'Gemini 2.0 Flash',
+    currentTask: 'Synthesizing Node.js Express controllers and Prisma CRUD logic',
+    color: '#3b82f6',
+    glowColor: 'rgba(59, 130, 246, 0.4)',
+    model: 'DeepSeek R1',
     steps: [],
     progress: 0,
-    metrics: { filesGenerated: 5, linesOfCode: 520, tokensProcessed: 9400, contractSyncs: 1 }
+    metrics: { filesGenerated: 3, linesOfCode: 320, tokensProcessed: 5400, contractSyncs: 1 }
   },
   database: {
     id: 'database',
-    name: 'Chronos DB',
-    title: 'Database & Schema Architect',
+    name: 'Prisma DBA',
+    title: 'Database Architect',
     avatar: '🗄️',
     role: 'database',
     status: 'idle',
-    currentTask: 'Ready to model Prisma schemas, SQL DDLs, and seed datasets',
+    currentTask: 'Managing PostgreSQL migrations and relation integrity',
     color: '#10b981',
     glowColor: 'rgba(16, 185, 129, 0.4)',
-    model: 'Gemini 2.0 Flash',
+    model: 'DeepSeek V3',
     steps: [],
     progress: 0,
     metrics: { filesGenerated: 2, linesOfCode: 190, tokensProcessed: 3200, contractSyncs: 1 }
@@ -151,7 +162,7 @@ const initialAgents: Record<AgentRole, AgentState> = {
     currentTask: 'Monitoring type parity and runtime validation',
     color: '#f59e0b',
     glowColor: 'rgba(245, 158, 11, 0.4)',
-    model: 'Gemini 2.0 Flash',
+    model: 'Gemini 2.5 Flash',
     steps: [],
     progress: 0,
     metrics: { filesGenerated: 0, linesOfCode: 0, tokensProcessed: 1800, contractSyncs: 1 }
@@ -161,25 +172,45 @@ const initialAgents: Record<AgentRole, AgentState> = {
 const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefined);
 
 export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // User & Google Auto-Fetched Credits State
+  // Panel Toggles
+  const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
+  const [isRightAssistantOpen, setIsRightAssistantOpen] = useState(true);
+  const [isBottomTerminalOpen, setIsBottomTerminalOpen] = useState(false);
+
+  // Navigation
+  const [activeActivityTab, setActiveActivityTab] = useState<ActivityTab>('explorer');
+  const [activeMainTab, setActiveMainTab] = useState<'editor' | 'dual-agents' | 'database-studio' | 'live-preview' | 'api-tester'>('editor');
+
+  // Google Auth & Credits
   const [user, setUser] = useState<UserProfile | null>(() => AuthCreditService.getSavedUser());
   const [credits, setCredits] = useState<CreditAccount>(() => AuthCreditService.getSavedCredits());
 
-  // Initialize with initial simulation bundle
-  const [initialBundle] = useState(() => SimulationEngine.generateFullstackProject('AI SaaS Platform with Analytics and Stripe Billing', 'postgresql'));
-  
-  const [vfs] = useState(() => new VirtualFileSystem(initialBundle.files));
+  // Filesystem initialization with INITIAL_WORKSPACE_FILES
+  const [vfs] = useState(() => new VirtualFileSystem(INITIAL_WORKSPACE_FILES));
   const [files, setFiles] = useState<Record<string, VirtualFile>>(() => vfs.getFiles());
-  const [activeFile, setActiveFile] = useState<VirtualFile | null>(() => vfs.getFile('frontend/src/App.tsx') || null);
-  const [openFileIds, setOpenFileIds] = useState<string[]>(['frontend/src/App.tsx', 'backend/src/server.ts', 'database/schema.prisma', 'contracts/api.ts']);
 
+  // Default active tab & file matches the screenshot
+  const [activeFile, setActiveFile] = useState<VirtualFile | null>(() => vfs.getFile('src/config/models.ts') || null);
+  const [openFileIds, setOpenFileIds] = useState<string[]>([
+    'src/components/auth/GoogleAuthModal.tsx',
+    'src/types/agent.ts',
+    'src/config/models.ts',
+    'README.md',
+    '.gitignore',
+    'index.html'
+  ]);
+
+  // AI & Swarm State
+  const [selectedModel, setSelectedModel] = useState<SupportedAIModel>('gemini-2.5-flash');
+  const [concurrencyMode, setConcurrencyMode] = useState<boolean>(true);
+  const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [agents, setAgents] = useState<Record<AgentRole, AgentState>>(initialAgents);
   const [interAgentMessages, setInterAgentMessages] = useState<InterAgentMessage[]>([
     {
       id: 'init_msg_1',
       from: 'architect',
       to: 'backend',
-      content: 'Contract v1.0.0 shared: Please prepare /api/v1/items and /api/v1/health endpoints.',
+      content: 'Contract v1.0.0 shared: Please prepare /api/v1/health and database schema.',
       timestamp: Date.now() - 30000,
       type: 'contract_proposal'
     },
@@ -187,52 +218,38 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({ children 
       id: 'init_msg_2',
       from: 'backend',
       to: 'frontend',
-      content: 'PostgreSQL database pool initialized. Endpoints live and responding.',
+      content: 'PostgreSQL connection initialized. REST endpoints responding cleanly.',
       timestamp: Date.now() - 25000,
       type: 'response'
-    },
-    {
-      id: 'init_msg_3',
-      from: 'frontend',
-      to: 'architect',
-      content: 'Frontend App mounted with responsive metrics dashboard and live mutation client.',
-      timestamp: Date.now() - 20000,
-      type: 'sync_alert'
     }
   ]);
 
-  const [selectedModel, setSelectedModel] = useState<SupportedAIModel>('gemini-2.5-flash');
-  const [concurrencyMode, setConcurrencyMode] = useState<boolean>(true);
-  const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  // Database & Contracts
+  const [databaseSchema, setDatabaseSchema] = useState<DatabaseSchema>(() => DatabaseEngine.createInitialSchema('postgresql', 'SaaS Platform'));
+  const [apiContract, setApiContract] = useState<ApiContract | null>(null);
 
-  const [databaseSchema, setDatabaseSchema] = useState<DatabaseSchema>(initialBundle.schema);
-  const [apiContract, setApiContract] = useState<ApiContract | null>(initialBundle.contract);
-
+  // GitHub Integration
   const [githubService] = useState(() => new GitHubService());
   const [githubConfig, setGithubConfig] = useState<GitHubConfig>(githubService.getConfig());
   const [gitCommits, setGitCommits] = useState<GitCommit[]>([
     {
-      id: 'c_init',
-      sha: '7f9a2d1',
-      message: 'feat: Initial fullstack architecture generated by Antigravity Swarm',
-      author: 'Antigravity Multi-Agent',
-      timestamp: Date.now() - 3600000,
-      filesChanged: 12,
-      additions: 1240,
+      id: 'c_first',
+      sha: '0505770',
+      message: 'first commit',
+      author: 'dgulati352-cpu',
+      timestamp: Date.now() - 360000,
+      filesChanged: 40,
+      additions: 9230,
       deletions: 0,
       branch: 'main'
     }
   ]);
 
-  const [activeMainTab, setActiveMainTab] = useState<'editor' | 'dual-agents' | 'database-studio' | 'live-preview' | 'api-tester' | 'github-sync'>('editor');
-  const [activeSideDrawer, setActiveSideDrawer] = useState<'explorer' | 'agents' | 'database' | 'contract' | 'github' | 'templates' | 'settings'>('explorer');
-  const [isBottomTerminalOpen, setIsBottomTerminalOpen] = useState<boolean>(true);
+  // Terminal Logs
   const [terminalLogs, setTerminalLogs] = useState<TerminalLogEntry[]>([
-    { id: '1', timestamp: new Date().toLocaleTimeString(), text: 'Antigravity Multi-AI Agent IDE Workspace v2.0 initialized.', level: 'cyan' },
-    { id: '2', timestamp: new Date().toLocaleTimeString(), text: 'Google Account Auto-Connected: Dhairya Gulati (developer.antigravity@gmail.com).', level: 'success' },
-    { id: '3', timestamp: new Date().toLocaleTimeString(), text: 'Auto-fetched Credits from Google ID: 8,420 Standard | 920 Premium Ultra Units.', level: 'purple' },
-    { id: '4', timestamp: new Date().toLocaleTimeString(), text: 'Dual AI Concurrency: [ENABLED] (Frontend Agent & Backend Agent parallel streams active).', level: 'cyan' },
-    { id: '5', timestamp: new Date().toLocaleTimeString(), text: 'Database Engine: PostgreSQL active with 3 relational models.', level: 'success' }
+    { id: '1', timestamp: new Date().toLocaleTimeString(), text: 'Antigravity IDE Multi-Agent Workspace initialized.', level: 'cyan' },
+    { id: '2', timestamp: new Date().toLocaleTimeString(), text: 'git commit -m "first commit" (0505770)', level: 'success' },
+    { id: '3', timestamp: new Date().toLocaleTimeString(), text: 'git push -u origin main -> https://github.com/dgulati352-cpu/chatubotu.git', level: 'success' }
   ]);
 
   const addTerminalLog = useCallback((text: string, level: 'info' | 'success' | 'warn' | 'error' | 'cyan' | 'purple' = 'info') => {
@@ -251,66 +268,30 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({ children 
     setTerminalLogs([]);
   }, []);
 
-  const loginWithGoogle = useCallback(async (emailOverride?: string) => {
-    const email = emailOverride || 'developer.antigravity@gmail.com';
-    const name = email.split('@')[0].replace('.', ' ').toUpperCase();
-    const newUser: UserProfile = {
-      id: `usr_g_${Math.floor(Math.random() * 899999) + 100000}`,
-      googleId: '109283746192837461928',
-      email,
-      name: name.charAt(0).toUpperCase() + name.slice(1).toLowerCase(),
-      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
-      plan: 'Antigravity Ultra',
-      tierLevel: 'Tier 3 (Enterprise Developer)',
-      organization: 'Google AI Studio & Antigravity Swarm',
-      createdAt: new Date().toISOString()
-    };
-
-    setUser(newUser);
-    AuthCreditService.saveUser(newUser);
-
-    addTerminalLog(`[AUTH] Authenticated with Google ID (${newUser.email})`, 'success');
-    addTerminalLog(`[CREDITS] Auto-fetching allocated tokens & premium quota from Google Cloud...`, 'purple');
-
-    const fetchedCredits = await AuthCreditService.fetchCreditsFromGoogleId(newUser.googleId, newUser.email);
-    setCredits(fetchedCredits);
-
-    addTerminalLog(`[CREDITS] Synced: ${fetchedCredits.standardCredits.toLocaleString()} Standard Credits | ${fetchedCredits.premiumCredits.toLocaleString()} Ultra Premium Units`, 'success');
-  }, [addTerminalLog]);
-
-  const logout = useCallback(() => {
-    setUser(null);
-    AuthCreditService.saveUser(null);
-    addTerminalLog('[AUTH] Disconnected Google Account.', 'warn');
-  }, [addTerminalLog]);
-
-  const refreshCredits = useCallback(async () => {
-    if (user) {
-      addTerminalLog(`[CREDITS] Auto-refreshing quota telemetry for ${user.email}...`, 'purple');
-      const latest = await AuthCreditService.fetchCreditsFromGoogleId(user.googleId, user.email);
-      setCredits(latest);
-      addTerminalLog(`[CREDITS] Telemetry up to date: ${latest.standardCredits} Standard | ${latest.premiumCredits} Premium`, 'success');
-    }
-  }, [user, addTerminalLog]);
-
   const openFile = useCallback((path: string) => {
     const file = vfs.getFile(path);
     if (file) {
       setActiveFile(file);
-      setOpenFileIds(prev => prev.includes(path) ? prev : [...prev, path]);
+      if (!openFileIds.includes(path)) {
+        setOpenFileIds(prev => [...prev, path]);
+      }
     }
-  }, [vfs]);
+  }, [vfs, openFileIds]);
 
   const closeFile = useCallback((path: string) => {
     setOpenFileIds(prev => {
-      const next = prev.filter(p => p !== path);
+      const next = prev.filter(id => id !== path);
       if (activeFile?.path === path) {
-        const nextActive = next.length > 0 ? vfs.getFile(next[next.length - 1]) || null : null;
-        setActiveFile(nextActive);
+        if (next.length > 0) {
+          const nextFile = vfs.getFile(next[next.length - 1]);
+          setActiveFile(nextFile || null);
+        } else {
+          setActiveFile(null);
+        }
       }
       return next;
     });
-  }, [activeFile, vfs]);
+  }, [vfs, activeFile]);
 
   const saveFileContent = useCallback((path: string, content: string) => {
     const updated = vfs.writeFile(path, content, 'user');
@@ -318,231 +299,187 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({ children 
     if (activeFile?.path === path) {
       setActiveFile(updated);
     }
-  }, [activeFile, vfs]);
+    addTerminalLog(`Saved ${path}`, 'info');
+  }, [vfs, activeFile, addTerminalLog]);
 
-  const createNewFile = useCallback((path: string, content: string = '') => {
-    const file = vfs.writeFile(path, content, 'user');
+  const createNewFile = useCallback((path: string, content = '// New file') => {
+    const newFile = vfs.writeFile(path, content, 'user');
     setFiles(vfs.getFiles());
-    openFile(path);
-    addTerminalLog(`Created file: ${path}`, 'info');
-  }, [vfs, openFile, addTerminalLog]);
+    setActiveFile(newFile);
+    if (!openFileIds.includes(path)) {
+      setOpenFileIds(prev => [...prev, path]);
+    }
+    addTerminalLog(`Created file ${path}`, 'success');
+  }, [vfs, openFileIds, addTerminalLog]);
 
   const deleteFile = useCallback((path: string) => {
     vfs.deleteFile(path);
     setFiles(vfs.getFiles());
     closeFile(path);
-    addTerminalLog(`Deleted file: ${path}`, 'warn');
+    addTerminalLog(`Deleted file ${path}`, 'warn');
   }, [vfs, closeFile, addTerminalLog]);
 
-  const changeDatabaseType = useCallback((type: DatabaseType) => {
-    const updated = DatabaseEngine.createInitialSchema(type, databaseSchema.name);
-    setDatabaseSchema(updated);
-
-    // Update prisma & sql files in VFS
-    const prisma = DatabaseEngine.generatePrismaSchema(updated);
-    const sql = DatabaseEngine.generateSqlDdl(updated);
-    vfs.writeFile('database/schema.prisma', prisma, 'database');
-    vfs.writeFile('database/migrations/001_init.sql', sql, 'database');
-    setFiles(vfs.getFiles());
-
-    addTerminalLog(`Switched database engine to ${type.toUpperCase()}. Updated Prisma schema and SQL migrations.`, 'success');
-  }, [databaseSchema.name, vfs, addTerminalLog]);
-
-  const executeDatabaseQuery = useCallback((sql: string) => {
-    const trimmed = sql.trim();
-    const startTime = Date.now();
-
-    // Check target table
-    const matchedModel = databaseSchema.models.find(m => 
-      trimmed.toLowerCase().includes(m.tableName.toLowerCase()) || trimmed.toLowerCase().includes(m.name.toLowerCase())
-    );
-
-    if (matchedModel) {
-      const rows = databaseSchema.mockData[matchedModel.id] || [];
-      const columns = matchedModel.columns.map(c => c.name);
-
-      setDatabaseSchema(prev => ({
-        ...prev,
-        rawQueriesHistory: [
-          {
-            id: `q_${Date.now()}`,
-            query: sql,
-            executedAt: Date.now(),
-            rowCount: rows.length,
-            status: 'success',
-            durationMs: Math.round((Date.now() - startTime + Math.random() * 5) * 10) / 10
-          },
-          ...prev.rawQueriesHistory
-        ]
-      }));
-
-      return { columns, rows, count: rows.length };
-    }
-
-    // Default response for other queries
-    return {
-      columns: ['status', 'message', 'timestamp'],
-      rows: [{ status: 'OK', message: 'Query executed successfully', timestamp: new Date().toISOString() }],
-      count: 1
-    };
-  }, [databaseSchema]);
-
-  const addNewTable = useCallback((name: string, description: string = '') => {
-    const tableName = name.toLowerCase().replace(/[^a-z0-9]/g, '_') + 's';
-    const newModelId = `model_${Date.now()}`;
-    const newModel = {
-      id: newModelId,
-      name,
-      tableName,
-      description,
-      columns: [
-        { name: 'id', type: 'UUID' as const, isPrimary: true, isNullable: false },
-        { name: 'name', type: 'String' as const, isNullable: false },
-        { name: 'createdAt', type: 'DateTime' as const, defaultValue: 'now()' }
-      ],
-      rowsCount: 1
-    };
-
-    setDatabaseSchema(prev => {
-      const updated = {
-        ...prev,
-        models: [...prev.models, newModel],
-        mockData: {
-          ...prev.mockData,
-          [newModelId]: [{ id: 'id_01', name: 'Sample ' + name, createdAt: new Date().toISOString() }]
-        }
-      };
-
-      const prisma = DatabaseEngine.generatePrismaSchema(updated);
-      vfs.writeFile('database/schema.prisma', prisma, 'database');
-      setFiles(vfs.getFiles());
-
-      return updated;
-    });
-
-    addTerminalLog(`Added new table "${tableName}" to ${databaseSchema.type.toUpperCase()} schema.`, 'success');
-  }, [databaseSchema.type, vfs, addTerminalLog]);
-
-  const pushToGitHub = useCallback(async (commitMessage: string) => {
-    addTerminalLog(`[GIT] Staging ${Object.keys(files).length} files for commit...`, 'info');
-    const commit = await githubService.pushFiles(files, commitMessage);
-    setGitCommits(prev => [commit, ...prev]);
-    addTerminalLog(`[GIT] Committed: "${commitMessage}" [${commit.sha}] to branch ${commit.branch}`, 'success');
-  }, [files, githubService, addTerminalLog]);
-
   const exportProjectZip = useCallback(async () => {
-    addTerminalLog(`[EXPORT] Bundling fullstack project into ZIP...`, 'info');
     const blob = await vfs.exportZip('antigravity-fullstack-app');
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `antigravity-${databaseSchema.name}-app.zip`;
-    document.body.appendChild(a);
+    a.download = `chatubotu-workspace-${Date.now()}.zip`;
     a.click();
-    document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    addTerminalLog(`[EXPORT] Download complete: antigravity-${databaseSchema.name}-app.zip`, 'success');
-  }, [vfs, databaseSchema.name, addTerminalLog]);
+    addTerminalLog('Workspace exported as ZIP.', 'success');
+  }, [vfs, addTerminalLog]);
 
-  const triggerFullstackBuild = useCallback(async (prompt: string, dbType: DatabaseType = databaseSchema.type) => {
+  const loginWithGoogle = useCallback(async (emailOverride?: string) => {
+    const loggedUser = await AuthCreditService.simulateGoogleLogin(emailOverride);
+    const userCredits = AuthCreditService.getSavedCredits();
+    setUser(loggedUser);
+    setCredits(userCredits);
+    addTerminalLog(`Google Account Connected: ${loggedUser.name} (${loggedUser.email})`, 'success');
+  }, [addTerminalLog]);
+
+  const logout = useCallback(() => {
+    AuthCreditService.logout();
+    setUser(null);
+    setCredits(AuthCreditService.getSavedCredits());
+    addTerminalLog('Signed out of Google account.', 'info');
+  }, [addTerminalLog]);
+
+  const refreshCredits = useCallback(async () => {
+    const updated = await AuthCreditService.refreshCredits();
+    setCredits(updated);
+    addTerminalLog(`Credits balance refreshed: ${updated.standardCredits} standard / ${updated.premiumCredits} premium.`, 'info');
+  }, [addTerminalLog]);
+
+  const changeDatabaseType = useCallback((type: DatabaseType) => {
+    const newSchema = DatabaseEngine.createInitialSchema(type, 'SaaS Platform');
+    setDatabaseSchema(newSchema);
+    addTerminalLog(`Database engine switched to: ${type.toUpperCase()}`, 'success');
+  }, [addTerminalLog]);
+
+  const executeDatabaseQuery = useCallback((sql: string) => {
+    return DatabaseEngine.executeQuery(databaseSchema, sql);
+  }, [databaseSchema]);
+
+  const addNewTable = useCallback((name: string, description?: string) => {
+    const updated = DatabaseEngine.addModelToSchema(databaseSchema, name, description);
+    setDatabaseSchema(updated);
+    addTerminalLog(`Table "${name}" created in ${databaseSchema.type.toUpperCase()}`, 'success');
+  }, [databaseSchema, addTerminalLog]);
+
+  const pushToGitHub = useCallback(async (message: string) => {
+    const commit = await githubService.commitAndPush(message, Object.keys(files));
+    setGitCommits(prev => [commit, ...prev]);
+    addTerminalLog(`Git commit: "${message}" [${commit.sha}] pushed to origin/${githubConfig.branch}`, 'success');
+  }, [githubService, files, githubConfig, addTerminalLog]);
+
+  const loadPresetTemplate = useCallback((templateName: string) => {
+    const bundle = SimulationEngine.generateFullstackProject(templateName, 'postgresql');
+    Object.values(bundle.files).forEach(f => vfs.writeFile(f.path, f.content, f.generatedBy));
+    setFiles(vfs.getFiles());
+    setDatabaseSchema(bundle.schema);
+    setApiContract(bundle.contract);
+    openFile('src/config/models.ts');
+    addTerminalLog(`Loaded template: "${templateName}"`, 'success');
+  }, [vfs, openFile, addTerminalLog]);
+
+  const triggerFullstackBuild = useCallback(async (prompt: string, dbType: DatabaseType = 'postgresql') => {
     setIsGenerating(true);
+    addTerminalLog(`Swarm activated for task: "${prompt}"`, 'cyan');
+
     const orchestrator = new MultiAgentOrchestrator(vfs);
 
-    // Deduct credits for concurrent agent swarm execution
-    setCredits(prev => {
-      const updated = AuthCreditService.deductCredits(prev, true, 2);
-      addTerminalLog(`[CREDITS] Deducted 10 Premium Credits & 4 Standard Credits for Swarm Execution. Remaining: ${updated.premiumCredits} Premium | ${updated.standardCredits} Standard`, 'purple');
-      return updated;
-    });
+    const callbacks: OrchestrationCallbacks = {
+      onAgentUpdate: (role: AgentRole, update: Partial<AgentState>) => {
+        setAgents(prev => ({
+          ...prev,
+          [role]: { ...prev[role], ...update }
+        }));
+      },
+      onInterAgentMessage: (msg: InterAgentMessage) => {
+        setInterAgentMessages(prev => [...prev, msg]);
+      },
+      onFileWritten: (path: string, content: string, role: AgentRole) => {
+        const written = vfs.writeFile(path, content, role);
+        setFiles(vfs.getFiles());
+        if (path === 'src/config/models.ts') {
+          setActiveFile(written);
+        }
+      },
+      onTerminalLog: (log: string, level?: 'info' | 'success' | 'warn' | 'error' | 'cyan' | 'purple') => {
+        addTerminalLog(log, level);
+      },
+      onContractSync: (contract: any) => {
+        setApiContract(contract);
+      },
+      onDatabaseUpdate: (schema: any) => {
+        setDatabaseSchema(schema);
+      }
+    };
 
     try {
-      await orchestrator.runConcurrentFullstackGeneration(prompt, dbType, {
-        onAgentUpdate: (role, update) => {
-          setAgents(prev => ({
-            ...prev,
-            [role]: { ...prev[role], ...update }
-          }));
-        },
-        onInterAgentMessage: (msg) => {
-          setInterAgentMessages(prev => [...prev, msg]);
-        },
-        onFileWritten: (path, content, role) => {
-          setFiles(vfs.getFiles());
-          const file = vfs.getFile(path);
-          if (file && !activeFile) {
-            setActiveFile(file);
-          }
-        },
-        onTerminalLog: (line, level) => {
-          addTerminalLog(line, level);
-        },
-        onContractSync: (contract) => {
-          setApiContract(contract);
-        },
-        onDatabaseUpdate: (schema) => {
-          setDatabaseSchema(schema);
-        }
-      });
+      await orchestrator.runConcurrentFullstackGeneration(prompt, dbType, callbacks);
+      addTerminalLog('Multi-Agent Swarm execution finished with Zero errors.', 'success');
     } catch (err: any) {
-      addTerminalLog(`[ERROR] Orchestration failed: ${err.message}`, 'error');
+      addTerminalLog(`Swarm error: ${err?.message || err}`, 'error');
     } finally {
       setIsGenerating(false);
     }
-  }, [vfs, databaseSchema.type, activeFile, addTerminalLog]);
+  }, [vfs, addTerminalLog]);
 
-  const loadPresetTemplate = useCallback((templateName: string) => {
-    triggerFullstackBuild(`Build ${templateName} with complete frontend, backend, database models, and API contract`);
-  }, [triggerFullstackBuild]);
+  const value: WorkspaceContextType = {
+    isLeftSidebarOpen,
+    setIsLeftSidebarOpen,
+    isRightAssistantOpen,
+    setIsRightAssistantOpen,
+    isBottomTerminalOpen,
+    setIsBottomTerminalOpen,
+    activeActivityTab,
+    setActiveActivityTab,
+    activeMainTab,
+    setActiveMainTab,
+    user,
+    credits,
+    loginWithGoogle,
+    logout,
+    refreshCredits,
+    selectedModel,
+    setSelectedModel,
+    concurrencyMode,
+    setConcurrencyMode,
+    isGenerating,
+    agents,
+    interAgentMessages,
+    vfs,
+    files,
+    activeFile,
+    openFileIds,
+    setActiveFile,
+    openFile,
+    closeFile,
+    saveFileContent,
+    createNewFile,
+    deleteFile,
+    exportProjectZip,
+    databaseSchema,
+    setDatabaseSchema,
+    changeDatabaseType,
+    executeDatabaseQuery,
+    addNewTable,
+    apiContract,
+    githubConfig,
+    setGithubConfig,
+    gitCommits,
+    pushToGitHub,
+    terminalLogs,
+    addTerminalLog,
+    clearTerminal,
+    triggerFullstackBuild,
+    loadPresetTemplate
+  };
 
   return (
-    <WorkspaceContext.Provider
-      value={{
-        user,
-        credits,
-        loginWithGoogle,
-        logout,
-        refreshCredits,
-        agents,
-        interAgentMessages,
-        selectedModel,
-        setSelectedModel,
-        isGenerating,
-        concurrencyMode,
-        setConcurrencyMode,
-        vfs,
-        files,
-        activeFile,
-        openFileIds,
-        setActiveFile,
-        openFile,
-        closeFile,
-        saveFileContent,
-        createNewFile,
-        deleteFile,
-        exportProjectZip,
-        databaseSchema,
-        setDatabaseSchema,
-        changeDatabaseType,
-        executeDatabaseQuery,
-        addNewTable,
-        apiContract,
-        githubConfig,
-        setGithubConfig,
-        gitCommits,
-        pushToGitHub,
-        activeMainTab,
-        setActiveMainTab,
-        activeSideDrawer,
-        setActiveSideDrawer,
-        isBottomTerminalOpen,
-        setIsBottomTerminalOpen,
-        terminalLogs,
-        addTerminalLog,
-        clearTerminal,
-        triggerFullstackBuild,
-        loadPresetTemplate
-      }}
-    >
+    <WorkspaceContext.Provider value={value}>
       {children}
     </WorkspaceContext.Provider>
   );

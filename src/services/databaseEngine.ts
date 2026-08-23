@@ -222,6 +222,64 @@ export class DatabaseEngine {
     };
   }
 
+  public static executeQuery(schema: DatabaseSchema, sql: string): { columns: string[]; rows: any[]; count: number; error?: string } {
+    const query = sql.trim().toLowerCase();
+    
+    // Simple mock SQL parser for interactive Database Studio
+    const firstModel = schema.models[0];
+    if (!firstModel) {
+      return { columns: [], rows: [], count: 0, error: 'No models found in database schema' };
+    }
+
+    // Match table name from query
+    let targetModel = firstModel;
+    for (const m of schema.models) {
+      if (query.includes(m.tableName.toLowerCase()) || query.includes(m.name.toLowerCase())) {
+        targetModel = m;
+        break;
+      }
+    }
+
+    const rows = schema.mockData[targetModel.id] || [];
+    const columns = targetModel.columns.map(c => c.name);
+
+    return {
+      columns,
+      rows,
+      count: rows.length
+    };
+  }
+
+  public static addModelToSchema(schema: DatabaseSchema, name: string, description = 'New relational model'): DatabaseSchema {
+    const tableName = name.toLowerCase().endsWith('s') ? name.toLowerCase() : `${name.toLowerCase()}s`;
+    const newModel: DatabaseModel = {
+      id: `model_${Date.now()}`,
+      name,
+      tableName,
+      description,
+      columns: [
+        { name: 'id', type: 'UUID', isPrimary: true, isNullable: false },
+        { name: 'name', type: 'String', isNullable: false },
+        { name: 'createdAt', type: 'DateTime', defaultValue: 'now()' }
+      ],
+      rowsCount: 1
+    };
+
+    const updatedModels = [...schema.models, newModel];
+    const updatedMockData = {
+      ...schema.mockData,
+      [newModel.id]: [
+        { id: `rec_01`, name: `Sample ${name} 1`, createdAt: new Date().toISOString() }
+      ]
+    };
+
+    return {
+      ...schema,
+      models: updatedModels,
+      mockData: updatedMockData
+    };
+  }
+
   public static generatePrismaSchema(schema: DatabaseSchema): string {
     const providerMap: Record<DatabaseType, string> = {
       postgresql: 'postgresql',

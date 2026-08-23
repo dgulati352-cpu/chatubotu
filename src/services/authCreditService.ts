@@ -13,7 +13,7 @@ export class AuthCreditService {
         console.error('Failed to parse user session', e);
       }
     }
-    // Default initial signed-in Google ID for seamless Antigravity experience
+    // Default initial signed-in Google ID matching Antigravity IDE
     const defaultUser: UserProfile = {
       id: 'usr_g_88492019',
       googleId: '109283746192837461928',
@@ -66,11 +66,38 @@ export class AuthCreditService {
     localStorage.setItem(this.STORAGE_KEY_CREDITS, JSON.stringify(credits));
   }
 
-  public static async fetchCreditsFromGoogleId(googleId: string, email: string): Promise<CreditAccount> {
-    // Simulated Google Cloud / AI Studio credit telemetry fetch
-    await new Promise(r => setTimeout(r, 600));
+  public static async simulateGoogleLogin(emailOverride?: string): Promise<UserProfile> {
+    await new Promise(r => setTimeout(r, 400));
+    const email = emailOverride || 'developer.antigravity@gmail.com';
+    const name = email.split('@')[0].replace('.', ' ').replace(/\b\w/g, l => l.toUpperCase());
 
-    // Dynamic calculation based on user email / Google ID
+    const user: UserProfile = {
+      id: `usr_${Date.now()}`,
+      googleId: `${Math.floor(Math.random() * 1000000000000000)}`,
+      email,
+      name,
+      avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
+      plan: 'Antigravity Ultra',
+      tierLevel: 'Tier 3 (Enterprise Developer)',
+      organization: 'DeepMind Antigravity Labs',
+      createdAt: new Date().toISOString()
+    };
+    this.saveUser(user);
+    await this.fetchCreditsFromGoogleId(user.googleId, user.email);
+    return user;
+  }
+
+  public static logout() {
+    this.saveUser(null);
+  }
+
+  public static async refreshCredits(): Promise<CreditAccount> {
+    const user = this.getSavedUser();
+    return this.fetchCreditsFromGoogleId(user?.googleId || 'default', user?.email || 'dev@antigravity.io');
+  }
+
+  public static async fetchCreditsFromGoogleId(googleId: string, email: string): Promise<CreditAccount> {
+    await new Promise(r => setTimeout(r, 400));
     const isPro = email.includes('google') || email.includes('pro') || email.includes('antigravity') || email.includes('dhairya') || email.includes('gmail');
     
     const credits: CreditAccount = {
