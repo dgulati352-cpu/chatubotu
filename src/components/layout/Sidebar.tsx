@@ -20,9 +20,8 @@ import {
   Code,
   FileText,
   Trash2,
-  Check,
-  Zap,
-  Cpu,
+  FolderOpen,
+  UploadCloud,
   Layers
 } from 'lucide-react';
 import { useWorkspace } from '../../context/WorkspaceContext';
@@ -35,6 +34,9 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ onOpenGitHubModal, onOpenAuthModal }) => {
   const {
+    workspaceName,
+    openLocalFolder,
+    openLocalFile,
     vfs,
     files,
     activeFile,
@@ -43,10 +45,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenGitHubModal, onOpenAuthM
     deleteFile,
     activeActivityTab,
     setActiveActivityTab,
-    databaseSchema,
     githubConfig,
     isLeftSidebarOpen,
-    setIsLeftSidebarOpen,
     gitCommits,
     pushToGitHub,
     selectedModel,
@@ -60,13 +60,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenGitHubModal, onOpenAuthM
     'folder_dist': false,
     'folder_node_modules': false,
     'folder_src': true,
-    'folder_src/components': false,
+    'folder_src/components': true,
+    'folder_src/components/agents': false,
+    'folder_src/components/layout': false,
+    'folder_src/components/editor': false,
     'folder_src/config': true,
     'folder_src/context': false,
     'folder_src/services': false,
-    'folder_src/types': false,
-    'folder_frontend': false,
-    'folder_backend': false
+    'folder_src/types': false
   });
 
   const [showNewFileInput, setShowNewFileInput] = useState(false);
@@ -153,7 +154,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenGitHubModal, onOpenAuthM
               ) : (
                 <ChevronRight className="w-3 h-3 text-[#c5c5c5]" />
               )}
-              <span className="text-[#90a4ae] text-[11px]">📁</span>
+              <span className="text-[#dcb67a] text-[12px]">📁</span>
               <span className="truncate font-sans text-[12px] text-[#cccccc] group-hover:text-white">
                 {node.name}
               </span>
@@ -344,6 +345,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenGitHubModal, onOpenAuthM
             <div className="h-9 px-3 flex items-center justify-between text-[#bbbbbb] font-sans text-[11px] font-bold tracking-wide">
               <span>EXPLORER</span>
               <div className="flex items-center gap-1 text-[#858585]">
+                {/* Open Local Folder Button */}
+                <button
+                  onClick={openLocalFolder}
+                  className="p-1 hover:bg-[#2a2a2a] text-cyan-400 hover:text-cyan-300 rounded transition"
+                  title="Open Local Folder from Computer (Ctrl+K Ctrl+O)"
+                >
+                  <FolderOpen className="w-3.5 h-3.5" />
+                </button>
+
+                {/* Open Local File Button */}
+                <button
+                  onClick={openLocalFile}
+                  className="p-1 hover:bg-[#2a2a2a] text-emerald-400 hover:text-emerald-300 rounded transition"
+                  title="Open Local File from Computer (Ctrl+O)"
+                >
+                  <UploadCloud className="w-3.5 h-3.5" />
+                </button>
+
                 <button
                   onClick={() => setShowNewFileInput(!showNewFileInput)}
                   className="p-1 hover:bg-[#2a2a2a] hover:text-white rounded transition"
@@ -395,18 +414,31 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenGitHubModal, onOpenAuthM
             )}
 
             {/* Root Folder & Tree View */}
-            <div className="flex-1 overflow-y-auto px-1 py-1 font-sans text-xs">
-              {/* Root item: "New folder (2)" */}
+            <div className="flex-1 overflow-y-auto px-1 py-1 font-sans text-xs custom-scrollbar">
+              {/* Root Workspace Folder Item */}
               <div
                 onClick={() => toggleFolder('root_workspace')}
-                className="flex items-center gap-1 px-1.5 py-[2px] font-bold text-[#cccccc] hover:bg-[#2a2d2e] cursor-pointer rounded text-[12px] group"
+                className="flex items-center justify-between px-1.5 py-[2px] font-bold text-[#cccccc] hover:bg-[#2a2d2e] cursor-pointer rounded text-[12px] group"
               >
-                {expandedFolders['root_workspace'] ? (
-                  <ChevronDown className="w-3 h-3 text-[#c5c5c5]" />
-                ) : (
-                  <ChevronRight className="w-3 h-3 text-[#c5c5c5]" />
-                )}
-                <span className="font-semibold text-white">New folder (2)</span>
+                <div className="flex items-center gap-1 truncate">
+                  {expandedFolders['root_workspace'] ? (
+                    <ChevronDown className="w-3 h-3 text-[#c5c5c5]" />
+                  ) : (
+                    <ChevronRight className="w-3 h-3 text-[#c5c5c5]" />
+                  )}
+                  <span className="font-semibold text-white truncate">{workspaceName}</span>
+                </div>
+
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openLocalFolder();
+                  }}
+                  className="opacity-0 group-hover:opacity-100 p-0.5 text-cyan-400 hover:text-white transition"
+                  title="Switch to another local folder"
+                >
+                  <FolderOpen className="w-3 h-3" />
+                </button>
               </div>
 
               {expandedFolders['root_workspace'] && (
@@ -597,7 +629,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ onOpenGitHubModal, onOpenAuthM
           <div className="flex flex-col h-full p-3 space-y-3">
             <div className="text-[11px] font-bold text-[#bbbbbb] uppercase">RUN & DEBUG</div>
             <p className="text-xs text-[#858585]">
-              Vite Development Sandbox is running at <span className="text-cyan-400 font-mono">http://localhost:5173</span>
+              Vite Development Sandbox is running at <span className="text-cyan-400 font-mono">http://localhost:3000</span>
             </p>
           </div>
         )}

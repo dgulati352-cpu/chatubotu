@@ -10,6 +10,7 @@ import { DatabaseEngine } from '../services/databaseEngine';
 import { SimulationEngine } from '../services/simulationEngine';
 import { GitHubService } from '../services/githubService';
 import { AuthCreditService } from '../services/authCreditService';
+import { LocalFileService } from '../services/localFileService';
 import { INITIAL_WORKSPACE_FILES } from '../services/defaultFiles';
 
 export interface TerminalLogEntry {
@@ -22,6 +23,14 @@ export interface TerminalLogEntry {
 export type ActivityTab = 'explorer' | 'search' | 'source-control' | 'debug' | 'extensions' | 'swarm';
 
 export interface WorkspaceContextType {
+  // Workspace Root
+  workspaceName: string;
+  setWorkspaceName: (name: string) => void;
+
+  // Local File & Folder Open Handlers
+  openLocalFolder: () => Promise<void>;
+  openLocalFile: () => Promise<void>;
+
   // Layout Panel Toggles
   isLeftSidebarOpen: boolean;
   setIsLeftSidebarOpen: (open: boolean) => void;
@@ -172,6 +181,9 @@ const initialAgents: Record<AgentRole, AgentState> = {
 const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefined);
 
 export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  // Workspace directory name
+  const [workspaceName, setWorkspaceName] = useState<string>('New folder (2)');
+
   // Panel Toggles
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
   const [isRightAssistantOpen, setIsRightAssistantOpen] = useState(true);
@@ -248,8 +260,7 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({ children 
   // Terminal Logs
   const [terminalLogs, setTerminalLogs] = useState<TerminalLogEntry[]>([
     { id: '1', timestamp: new Date().toLocaleTimeString(), text: 'Antigravity IDE Multi-Agent Workspace initialized.', level: 'cyan' },
-    { id: '2', timestamp: new Date().toLocaleTimeString(), text: 'git commit -m "first commit" (0505770)', level: 'success' },
-    { id: '3', timestamp: new Date().toLocaleTimeString(), text: 'git push -u origin main -> https://github.com/dgulati352-cpu/chatubotu.git', level: 'success' }
+    { id: '2', timestamp: new Date().toLocaleTimeString(), text: 'Ready to open local folders & files directly from PC.', level: 'success' }
   ]);
 
   const addTerminalLog = useCallback((text: string, level: 'info' | 'success' | 'warn' | 'error' | 'cyan' | 'purple' = 'info') => {
@@ -319,16 +330,52 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({ children 
     addTerminalLog(`Deleted file ${path}`, 'warn');
   }, [vfs, closeFile, addTerminalLog]);
 
+  // Open Local Folder from PC
+  const openLocalFolder = useCallback(async () => {
+    addTerminalLog('Opening local directory selector...', 'cyan');
+    const result = await LocalFileService.openDirectoryPicker();
+    if (result && Object.keys(result.files).length > 0) {
+      setWorkspaceName(result.folderName);
+      // Populate VFS with local files
+      Object.values(result.files).forEach(f => {
+        vfs.writeFile(f.path, f.content, 'user');
+      });
+      setFiles(vfs.getFiles());
+
+      // Open first readable file or package.json/App.tsx
+      const fileKeys = Object.keys(result.files);
+      const priorityFile = fileKeys.find(k => k.includes('App') || k.includes('index') || k.includes('models') || k.includes('package.json')) || fileKeys[0];
+      if (priorityFile) {
+        openFile(priorityFile);
+      }
+      addTerminalLog(`Loaded ${fileKeys.length} files from local folder "${result.folderName}".`, 'success');
+    }
+  }, [vfs, openFile, addTerminalLog]);
+
+  // Open Local File(s) from PC
+  const openLocalFile = useCallback(async () => {
+    addTerminalLog('Opening local file selector...', 'cyan');
+    const pickedFiles = await LocalFileService.openFilesPicker();
+    if (pickedFiles && pickedFiles.length > 0) {
+      pickedFiles.forEach(f => {
+        vfs.writeFile(f.path, f.content, 'user');
+      });
+      setFiles(vfs.getFiles());
+      openFile(pickedFiles[0].path);
+      addTerminalLog(`Opened ${pickedFiles.length} file(s) from local disk.`, 'success');
+    }
+  }, [vfs, openFile, addTerminalLog]);
+
   const exportProjectZip = useCallback(async () => {
-    const blob = await vfs.exportZip('antigravity-fullstack-app');
+    const blob = await vfs.exportZip(workspaceName);
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `chatubotu-workspace-${Date.now()}.zip`;
+    a.download = `${workspaceName.replace(/\s+/g, '_')}-${Date.now()}.zip`;
     a.click();
     URL.revokeObjectURL(url);
     addTerminalLog('Workspace exported as ZIP.', 'success');
-  }, [vfs, addTerminalLog]);
+  }, [vfs, workspaceName, addTerminalLog]);
 
   const loginWithGoogle = useCallback(async (emailOverride?: string) => {
     const loggedUser = await AuthCreditService.simulateGoogleLogin(emailOverride);
@@ -428,6 +475,10 @@ export const WorkspaceProvider: React.FC<{ children: ReactNode }> = ({ children 
   }, [vfs, addTerminalLog]);
 
   const value: WorkspaceContextType = {
+    workspaceName,
+    setWorkspaceName,
+    openLocalFolder,
+    openLocalFile,
     isLeftSidebarOpen,
     setIsLeftSidebarOpen,
     isRightAssistantOpen,

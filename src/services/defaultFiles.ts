@@ -201,6 +201,126 @@ export interface ModelMetadata {
   contextWindow: string;
 }`
   },
+  'src/components/layout/Header.tsx': {
+    id: 'f_header_tsx',
+    path: 'src/components/layout/Header.tsx',
+    name: 'Header.tsx',
+    module: 'frontend',
+    language: 'tsx',
+    lastModified: Date.now(),
+    generatedBy: 'frontend',
+    content: `// Antigravity IDE Titlebar & Menu Header`
+  },
+  'src/components/layout/Sidebar.tsx': {
+    id: 'f_sidebar_tsx',
+    path: 'src/components/layout/Sidebar.tsx',
+    name: 'Sidebar.tsx',
+    module: 'frontend',
+    language: 'tsx',
+    lastModified: Date.now(),
+    generatedBy: 'frontend',
+    content: `// Antigravity IDE Activity Bar & Explorer Sidebar`
+  },
+  'src/components/layout/StatusBar.tsx': {
+    id: 'f_status_tsx',
+    path: 'src/components/layout/StatusBar.tsx',
+    name: 'StatusBar.tsx',
+    module: 'frontend',
+    language: 'tsx',
+    lastModified: Date.now(),
+    generatedBy: 'frontend',
+    content: `// Antigravity IDE Bottom Status Bar`
+  },
+  'src/components/editor/CodeEditor.tsx': {
+    id: 'f_editor_tsx',
+    path: 'src/components/editor/CodeEditor.tsx',
+    name: 'CodeEditor.tsx',
+    module: 'frontend',
+    language: 'tsx',
+    lastModified: Date.now(),
+    generatedBy: 'frontend',
+    content: `// Monaco / VS Code Styled Code Editor with Minimap`
+  },
+  'src/components/agents/MultiAgentCopilot.tsx': {
+    id: 'f_copilot_tsx',
+    path: 'src/components/agents/MultiAgentCopilot.tsx',
+    name: 'MultiAgentCopilot.tsx',
+    module: 'frontend',
+    language: 'tsx',
+    lastModified: Date.now(),
+    generatedBy: 'frontend',
+    content: `// Dual Frontend & Backend Split Swarm Copilot Panel`
+  },
+  'src/components/agents/DualAgentStream.tsx': {
+    id: 'f_dual_stream_tsx',
+    path: 'src/components/agents/DualAgentStream.tsx',
+    name: 'DualAgentStream.tsx',
+    module: 'frontend',
+    language: 'tsx',
+    lastModified: Date.now(),
+    generatedBy: 'frontend',
+    content: `// Concurrent Dual Agent Stream Workspace`
+  },
+  'src/components/agents/AgentCard.tsx': {
+    id: 'f_agent_card_tsx',
+    path: 'src/components/agents/AgentCard.tsx',
+    name: 'AgentCard.tsx',
+    module: 'frontend',
+    language: 'tsx',
+    lastModified: Date.now(),
+    generatedBy: 'frontend',
+    content: `// Swarm Agent Status Card with Progress and Metrics`
+  },
+  'src/components/agents/InterAgentChat.tsx': {
+    id: 'f_inter_agent_chat_tsx',
+    path: 'src/components/agents/InterAgentChat.tsx',
+    name: 'InterAgentChat.tsx',
+    module: 'frontend',
+    language: 'tsx',
+    lastModified: Date.now(),
+    generatedBy: 'frontend',
+    content: `// Inter-Agent Handshake and Contract Negotiation Stream`
+  },
+  'src/components/database/DatabaseStudio.tsx': {
+    id: 'f_db_studio_tsx',
+    path: 'src/components/database/DatabaseStudio.tsx',
+    name: 'DatabaseStudio.tsx',
+    module: 'frontend',
+    language: 'tsx',
+    lastModified: Date.now(),
+    generatedBy: 'frontend',
+    content: `// Database Studio with Schema Inspector and SQL Query Sandbox`
+  },
+  'src/components/preview/LivePreview.tsx': {
+    id: 'f_preview_tsx',
+    path: 'src/components/preview/LivePreview.tsx',
+    name: 'LivePreview.tsx',
+    module: 'frontend',
+    language: 'tsx',
+    lastModified: Date.now(),
+    generatedBy: 'frontend',
+    content: `// Live Interactive Fullstack Sandbox and Web App Preview`
+  },
+  'src/components/preview/ApiTester.tsx': {
+    id: 'f_api_tester_tsx',
+    path: 'src/components/preview/ApiTester.tsx',
+    name: 'ApiTester.tsx',
+    module: 'frontend',
+    language: 'tsx',
+    lastModified: Date.now(),
+    generatedBy: 'frontend',
+    content: `// Postman-like Interactive REST API Client`
+  },
+  'src/components/terminal/AntigravityTerminal.tsx': {
+    id: 'f_terminal_tsx',
+    path: 'src/components/terminal/AntigravityTerminal.tsx',
+    name: 'AntigravityTerminal.tsx',
+    module: 'frontend',
+    language: 'tsx',
+    lastModified: Date.now(),
+    generatedBy: 'frontend',
+    content: `// Integrated Developer Terminal and Swarm Telemetry Dock`
+  },
   'src/components/auth/GoogleAuthModal.tsx': {
     id: 'f_auth_modal_tsx',
     path: 'src/components/auth/GoogleAuthModal.tsx',
@@ -283,6 +403,220 @@ export const GoogleAuthModal: React.FC<{ isOpen: boolean; onClose: () => void }>
   );
 };`
   },
+  'src/components/github/GitHubModal.tsx': {
+    id: 'f_github_modal_tsx',
+    path: 'src/components/github/GitHubModal.tsx',
+    name: 'GitHubModal.tsx',
+    module: 'frontend',
+    language: 'tsx',
+    lastModified: Date.now(),
+    generatedBy: 'frontend',
+    content: `// GitHub Connection & Remote Synchronization Modal`
+  },
+  'src/context/WorkspaceContext.tsx': {
+    id: 'f_context_tsx',
+    path: 'src/context/WorkspaceContext.tsx',
+    name: 'WorkspaceContext.tsx',
+    module: 'shared',
+    language: 'tsx',
+    lastModified: Date.now(),
+    generatedBy: 'architect',
+    content: `// Antigravity Workspace State Context Provider`
+  },
+  'src/services/aiService.ts': {
+    id: 'f_ai_service_ts',
+    path: 'src/services/aiService.ts',
+    name: 'aiService.ts',
+    module: 'backend',
+    language: 'typescript',
+    lastModified: Date.now(),
+    generatedBy: 'backend',
+    content: `// AI API Connector & Multi-Model Switcher`
+  },
+  'src/services/authCreditService.ts': {
+    id: 'f_auth_service_ts',
+    path: 'src/services/authCreditService.ts',
+    name: 'authCreditService.ts',
+    module: 'backend',
+    language: 'typescript',
+    lastModified: Date.now(),
+    generatedBy: 'backend',
+    content: `// Google Auth & Live AI Credits Balances`
+  },
+  'src/services/databaseEngine.ts': {
+    id: 'f_db_engine_ts',
+    path: 'src/services/databaseEngine.ts',
+    name: 'databaseEngine.ts',
+    module: 'database',
+    language: 'typescript',
+    lastModified: Date.now(),
+    generatedBy: 'database',
+    content: `// Relational Schema Generator, Prisma Synthesizer, & SQL Engine`
+  },
+  'src/services/githubService.ts': {
+    id: 'f_github_service_ts',
+    path: 'src/services/githubService.ts',
+    name: 'githubService.ts',
+    module: 'backend',
+    language: 'typescript',
+    lastModified: Date.now(),
+    generatedBy: 'backend',
+    content: `// GitHub Remote Repository Sync & Push Service`
+  },
+  'src/services/orchestrator.ts': {
+    id: 'f_orchestrator_ts',
+    path: 'src/services/orchestrator.ts',
+    name: 'orchestrator.ts',
+    module: 'backend',
+    language: 'typescript',
+    lastModified: Date.now(),
+    generatedBy: 'architect',
+    content: `// Multi-Agent Concurrent Swarm Orchestration Engine`
+  },
+  'src/services/simulationEngine.ts': {
+    id: 'f_sim_engine_ts',
+    path: 'src/services/simulationEngine.ts',
+    name: 'simulationEngine.ts',
+    module: 'backend',
+    language: 'typescript',
+    lastModified: Date.now(),
+    generatedBy: 'architect',
+    content: `// Fullstack Project Blueprint Synthesis Engine`
+  },
+  'src/services/virtualFs.ts': {
+    id: 'f_virtual_fs_ts',
+    path: 'src/services/virtualFs.ts',
+    name: 'virtualFs.ts',
+    module: 'shared',
+    language: 'typescript',
+    lastModified: Date.now(),
+    generatedBy: 'architect',
+    content: `// Virtual In-Memory File System & ZIP Exporter`
+  },
+  'src/types/database.ts': {
+    id: 'f_db_ts',
+    path: 'src/types/database.ts',
+    name: 'database.ts',
+    module: 'database',
+    language: 'typescript',
+    lastModified: Date.now(),
+    generatedBy: 'database',
+    content: `export type DatabaseType = 'postgresql' | 'sqlite' | 'mysql' | 'mongodb' | 'supabase' | 'redis';
+
+export interface ColumnDefinition {
+  id: string;
+  name: string;
+  type: string;
+  isPrimary?: boolean;
+  isNullable?: boolean;
+  isUnique?: boolean;
+  defaultValue?: string;
+  relationTo?: string;
+}
+
+export interface ModelDefinition {
+  id: string;
+  name: string;
+  tableName: string;
+  columns: ColumnDefinition[];
+  rowsCount?: number;
+}
+
+export interface DatabaseSchema {
+  type: DatabaseType;
+  models: ModelDefinition[];
+  mockData: Record<string, any[]>;
+  version: number;
+}`
+  },
+  'src/types/github.ts': {
+    id: 'f_github_types_ts',
+    path: 'src/types/github.ts',
+    name: 'github.ts',
+    module: 'shared',
+    language: 'typescript',
+    lastModified: Date.now(),
+    generatedBy: 'architect',
+    content: `// GitHub Integration Types`
+  },
+  'src/types/project.ts': {
+    id: 'f_project_types_ts',
+    path: 'src/types/project.ts',
+    name: 'project.ts',
+    module: 'shared',
+    language: 'typescript',
+    lastModified: Date.now(),
+    generatedBy: 'architect',
+    content: `// Fullstack Project & Virtual File Types`
+  },
+  'src/types/user.ts': {
+    id: 'f_user_ts',
+    path: 'src/types/user.ts',
+    name: 'user.ts',
+    module: 'shared',
+    language: 'typescript',
+    lastModified: Date.now(),
+    generatedBy: 'architect',
+    content: `export interface UserProfile {
+  id: string;
+  googleId: string;
+  email: string;
+  name: string;
+  avatar: string;
+  plan: 'Free Swarm' | 'Pro Architect' | 'Enterprise Neural Team';
+  organization?: string;
+  createdAt: number;
+}
+
+export interface CreditAccount {
+  standardCredits: number;
+  maxStandardCredits: number;
+  premiumCredits: number;
+  maxPremiumCredits: number;
+  renewalDate: string;
+  concurrentAgentSlots: number;
+}`
+  },
+  'src/App.tsx': {
+    id: 'f_app_tsx',
+    path: 'src/App.tsx',
+    name: 'App.tsx',
+    module: 'frontend',
+    language: 'tsx',
+    lastModified: Date.now(),
+    generatedBy: 'frontend',
+    content: `import React from 'react';
+import { WorkspaceProvider } from './context/WorkspaceContext';
+import { AntigravityIDE } from './components/AntigravityIDE';
+
+export default function App() {
+  return (
+    <WorkspaceProvider>
+      <AntigravityIDE />
+    </WorkspaceProvider>
+  );
+}`
+  },
+  'src/index.css': {
+    id: 'f_index_css',
+    path: 'src/index.css',
+    name: 'index.css',
+    module: 'frontend',
+    language: 'css',
+    lastModified: Date.now(),
+    generatedBy: 'frontend',
+    content: `@tailwind base;\n@tailwind components;\n@tailwind utilities;\n\n:root { color-scheme: dark; }`
+  },
+  'src/main.tsx': {
+    id: 'f_main_tsx',
+    path: 'src/main.tsx',
+    name: 'main.tsx',
+    module: 'frontend',
+    language: 'tsx',
+    lastModified: Date.now(),
+    generatedBy: 'frontend',
+    content: `import React from 'react';\nimport ReactDOM from 'react-dom/client';\nimport App from './App';\nimport './index.css';\n\nReactDOM.createRoot(document.getElementById('root')!).render(<React.StrictMode><App /></React.StrictMode>);`
+  },
   'README.md': {
     id: 'f_readme_md',
     path: 'README.md',
@@ -327,37 +661,7 @@ npm run build
     language: 'env',
     lastModified: Date.now(),
     generatedBy: 'architect',
-    content: `# Dependencies
-node_modules/
-.pnp
-.pnp.js
-
-# Production build outputs
-dist/
-dist-ssr/
-build/
-
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-
-# Environment files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Editor / OS
-.vscode/
-.idea/
-.DS_Store
-Thumbs.db`
+    content: `# Dependencies\nnode_modules/\n.pnp\n.pnp.js\n\n# Production build outputs\ndist/\nbuild/\n\n# Environment files\n.env\n.env.local`
   },
   'index.html': {
     id: 'f_index_html',
@@ -367,22 +671,7 @@ Thumbs.db`
     language: 'html',
     lastModified: Date.now(),
     generatedBy: 'frontend',
-    content: `<!DOCTYPE html>
-<html lang="en" class="dark">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Antigravity Multi-Agent IDE</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-  </head>
-  <body class="bg-[#08090d] text-slate-100 antialiased selection:bg-cyan-500/30 selection:text-cyan-200">
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>`
+    content: `<!DOCTYPE html>\n<html lang="en" class="dark">\n  <head>\n    <meta charset="UTF-8" />\n    <title>Antigravity Multi-Agent IDE</title>\n  </head>\n  <body>\n    <div id="root"></div>\n    <script type="module" src="/src/main.tsx"></script>\n  </body>\n</html>`
   },
   'package.json': {
     id: 'f_package_json',
@@ -401,115 +690,37 @@ Thumbs.db`
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview"
-  },
-  "dependencies": {
-    "clsx": "^2.1.1",
-    "canvas-confetti": "^1.9.4",
-    "jszip": "^3.10.1",
-    "lucide-react": "^0.475.0",
-    "prismjs": "^1.29.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "tailwind-merge": "^3.0.1"
-  },
-  "devDependencies": {
-    "@types/canvas-confetti": "^1.9.0",
-    "@types/jszip": "^3.4.1",
-    "@types/node": "^22.13.4",
-    "@types/prismjs": "^1.26.5",
-    "@types/react": "^18.3.18",
-    "@types/react-dom": "^18.3.5",
-    "@vitejs/plugin-react": "^4.3.4",
-    "autoprefixer": "^10.4.20",
-    "postcss": "^8.5.2",
-    "tailwindcss": "^3.4.17",
-    "typescript": "^5.7.3",
-    "vite": "^6.1.0"
   }
 }`
   },
-  'src/App.tsx': {
-    id: 'f_app_tsx',
-    path: 'src/App.tsx',
-    name: 'App.tsx',
-    module: 'frontend',
-    language: 'tsx',
+  'tailwind.config.js': {
+    id: 'f_tailwind_config_js',
+    path: 'tailwind.config.js',
+    name: 'tailwind.config.js',
+    module: 'root',
+    language: 'javascript',
     lastModified: Date.now(),
     generatedBy: 'frontend',
-    content: `import React from 'react';
-import { WorkspaceProvider } from './context/WorkspaceContext';
-import { AntigravityIDE } from './components/AntigravityIDE';
-
-export default function App() {
-  return (
-    <WorkspaceProvider>
-      <AntigravityIDE />
-    </WorkspaceProvider>
-  );
-}`
+    content: `/** @type {import('tailwindcss').Config} */\nexport default {\n  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],\n  darkMode: 'class',\n  theme: { extend: {} },\n  plugins: []\n};`
   },
-  'src/types/database.ts': {
-    id: 'f_db_ts',
-    path: 'src/types/database.ts',
-    name: 'database.ts',
-    module: 'database',
-    language: 'typescript',
+  'tsconfig.json': {
+    id: 'f_tsconfig_json',
+    path: 'tsconfig.json',
+    name: 'tsconfig.json',
+    module: 'root',
+    language: 'json',
     lastModified: Date.now(),
-    generatedBy: 'database',
-    content: `export type DatabaseType = 'postgresql' | 'sqlite' | 'mysql' | 'mongodb' | 'supabase' | 'redis';
-
-export interface ColumnDefinition {
-  id: string;
-  name: string;
-  type: string;
-  isPrimary?: boolean;
-  isNullable?: boolean;
-  isUnique?: boolean;
-  defaultValue?: string;
-  relationTo?: string;
-}
-
-export interface ModelDefinition {
-  id: string;
-  name: string;
-  tableName: string;
-  columns: ColumnDefinition[];
-  rowsCount?: number;
-}
-
-export interface DatabaseSchema {
-  type: DatabaseType;
-  models: ModelDefinition[];
-  mockData: Record<string, any[]>;
-  version: number;
-}`
+    generatedBy: 'architect',
+    content: `{\n  "compilerOptions": {\n    "target": "ES2020",\n    "useDefineForClassFields": true,\n    "lib": ["ES2020", "DOM", "DOM.Iterable"],\n    "module": "ESNext",\n    "skipLibCheck": true,\n    "moduleResolution": "bundler",\n    "allowImportingTsExtensions": true,\n    "resolveJsonModule": true,\n    "isolatedModules": true,\n    "noEmit": true,\n    "jsx": "react-jsx",\n    "strict": true,\n    "noUnusedLocals": true,\n    "noUnusedParameters": true,\n    "noFallthroughCasesInSwitch": true\n  },\n  "include": ["src"]\n}`
   },
-  'src/types/user.ts': {
-    id: 'f_user_ts',
-    path: 'src/types/user.ts',
-    name: 'user.ts',
-    module: 'shared',
+  'vite.config.ts': {
+    id: 'f_vite_config_ts',
+    path: 'vite.config.ts',
+    name: 'vite.config.ts',
+    module: 'root',
     language: 'typescript',
     lastModified: Date.now(),
     generatedBy: 'architect',
-    content: `export interface UserProfile {
-  id: string;
-  googleId: string;
-  email: string;
-  name: string;
-  avatar: string;
-  plan: 'Free Swarm' | 'Pro Architect' | 'Enterprise Neural Team';
-  organization?: string;
-  createdAt: number;
-}
-
-export interface CreditAccount {
-  standardCredits: number;
-  maxStandardCredits: number;
-  premiumCredits: number;
-  maxPremiumCredits: number;
-  renewalDate: string;
-  concurrentAgentSlots: number;
-}`
+    content: `import { defineConfig } from 'vite';\nimport react from '@vitejs/plugin-react';\n\nexport default defineConfig({\n  plugins: [react()],\n  server: { port: 3000 }\n});`
   }
 };

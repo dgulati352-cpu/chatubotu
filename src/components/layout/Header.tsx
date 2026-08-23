@@ -7,11 +7,7 @@ import {
   PanelRight,
   Minus,
   Square,
-  X,
-  Sparkles,
-  Bot,
-  Zap,
-  ChevronDown
+  X
 } from 'lucide-react';
 import { useWorkspace } from '../../context/WorkspaceContext';
 
@@ -20,8 +16,20 @@ interface HeaderProps {
   onOpenAuthModal?: () => void;
 }
 
+interface MenuItem {
+  name: string;
+  shortcut?: string;
+  action?: () => void;
+}
+
+interface MenuGroup {
+  label: string;
+  items: MenuItem[];
+}
+
 export const Header: React.FC<HeaderProps> = ({ onOpenAuthModal }) => {
   const {
+    workspaceName,
     activeFile,
     isLeftSidebarOpen,
     setIsLeftSidebarOpen,
@@ -30,24 +38,84 @@ export const Header: React.FC<HeaderProps> = ({ onOpenAuthModal }) => {
     isBottomTerminalOpen,
     setIsBottomTerminalOpen,
     user,
-    credits,
-    activeMainTab,
-    setActiveMainTab,
-    selectedModel,
-    setSelectedModel
+    openLocalFolder,
+    openLocalFile,
+    exportProjectZip,
+    createNewFile
   } = useWorkspace();
 
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
 
-  const menuItems = [
-    { label: 'File', items: ['New File (Ctrl+N)', 'Open File (Ctrl+O)', 'Save (Ctrl+S)', 'Export Project (ZIP)', 'Close Editor'] },
-    { label: 'Edit', items: ['Undo (Ctrl+Z)', 'Redo (Ctrl+Y)', 'Cut', 'Copy', 'Paste', 'Find (Ctrl+F)'] },
-    { label: 'Selection', items: ['Select All (Ctrl+A)', 'Expand Selection', 'Shrink Selection', 'Add Cursor Above', 'Add Cursor Below'] },
-    { label: 'View', items: ['Explorer', 'Search', 'Source Control', 'Multi-Agent Swarm', 'Database Studio', 'Live Sandbox', 'Terminal'] },
-    { label: 'Go', items: ['Go to File... (Ctrl+P)', 'Go to Symbol...', 'Go to Line...'] },
-    { label: 'Run', items: ['Start Debugging (F5)', 'Run Without Debugging', 'Build Fullstack Application', 'Run Unit Tests'] },
-    { label: 'Terminal', items: ['New Terminal (Ctrl+`)', 'Split Terminal', 'Run Active Task', 'Clear Logs'] },
-    { label: 'Help', items: ['Welcome', 'Documentation', 'Keyboard Shortcuts', 'About Antigravity IDE'] }
+  const menuGroups: MenuGroup[] = [
+    {
+      label: 'File',
+      items: [
+        { name: 'New File', shortcut: 'Ctrl+N', action: () => createNewFile('src/newFile.ts') },
+        { name: 'Open File...', shortcut: 'Ctrl+O', action: openLocalFile },
+        { name: 'Open Folder...', shortcut: 'Ctrl+K Ctrl+O', action: openLocalFolder },
+        { name: 'Save', shortcut: 'Ctrl+S', action: () => {} },
+        { name: 'Export Project (ZIP)', shortcut: 'Ctrl+E', action: exportProjectZip },
+        { name: 'Close Editor', shortcut: 'Ctrl+W', action: () => {} }
+      ]
+    },
+    {
+      label: 'Edit',
+      items: [
+        { name: 'Undo', shortcut: 'Ctrl+Z' },
+        { name: 'Redo', shortcut: 'Ctrl+Y' },
+        { name: 'Cut', shortcut: 'Ctrl+X' },
+        { name: 'Copy', shortcut: 'Ctrl+C' },
+        { name: 'Paste', shortcut: 'Ctrl+V' },
+        { name: 'Find in Files', shortcut: 'Ctrl+Shift+F' }
+      ]
+    },
+    {
+      label: 'Selection',
+      items: [
+        { name: 'Select All', shortcut: 'Ctrl+A' },
+        { name: 'Expand Selection', shortcut: 'Alt+Shift+Right' },
+        { name: 'Add Cursor Above', shortcut: 'Ctrl+Alt+Up' },
+        { name: 'Add Cursor Below', shortcut: 'Ctrl+Alt+Down' }
+      ]
+    },
+    {
+      label: 'View',
+      items: [
+        { name: 'Explorer', shortcut: 'Ctrl+Shift+E' },
+        { name: 'Search', shortcut: 'Ctrl+Shift+F' },
+        { name: 'Source Control', shortcut: 'Ctrl+Shift+G' },
+        { name: 'Dual Swarm Panel', shortcut: 'Ctrl+Shift+A' },
+        { name: 'Toggle Terminal', shortcut: 'Ctrl+`' }
+      ]
+    },
+    {
+      label: 'Go',
+      items: [
+        { name: 'Go to File...', shortcut: 'Ctrl+P' },
+        { name: 'Go to Line...', shortcut: 'Ctrl+G' }
+      ]
+    },
+    {
+      label: 'Run',
+      items: [
+        { name: 'Start Debugging', shortcut: 'F5' },
+        { name: 'Build Fullstack App', shortcut: 'Ctrl+Shift+B' }
+      ]
+    },
+    {
+      label: 'Terminal',
+      items: [
+        { name: 'New Terminal', shortcut: 'Ctrl+`' },
+        { name: 'Run Build Task', shortcut: 'Ctrl+Shift+T' }
+      ]
+    },
+    {
+      label: 'Help',
+      items: [
+        { name: 'Welcome & Documentation' },
+        { name: 'About Antigravity IDE' }
+      ]
+    }
   ];
 
   return (
@@ -63,7 +131,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenAuthModal }) => {
 
         {/* Menu Bar Items */}
         <div className="flex items-center text-[12px] text-[#cccccc]">
-          {menuItems.map((menu) => (
+          {menuGroups.map((menu) => (
             <div key={menu.label} className="relative">
               <button
                 onClick={() => setActiveMenu(activeMenu === menu.label ? null : menu.label)}
@@ -83,17 +151,20 @@ export const Header: React.FC<HeaderProps> = ({ onOpenAuthModal }) => {
                     className="fixed inset-0 z-40"
                     onClick={() => setActiveMenu(null)}
                   />
-                  <div className="absolute left-0 top-full mt-0.5 w-52 bg-[#1f1f1f] border border-[#3c3c3c] rounded-md shadow-2xl py-1 z-50 animate-fade-in text-[12px]">
+                  <div className="absolute left-0 top-full mt-0.5 w-60 bg-[#1f1f1f] border border-[#3c3c3c] rounded-md shadow-2xl py-1 z-50 animate-fade-in text-[12px]">
                     {menu.items.map((item, idx) => (
                       <button
                         key={idx}
-                        onClick={() => setActiveMenu(null)}
-                        className="w-full text-left px-3 py-1 text-slate-300 hover:bg-[#094771] hover:text-white flex items-center justify-between transition"
+                        onClick={() => {
+                          setActiveMenu(null);
+                          if (item.action) item.action();
+                        }}
+                        className="w-full text-left px-3 py-1.5 text-slate-300 hover:bg-[#094771] hover:text-white flex items-center justify-between transition"
                       >
-                        <span>{item.split(' (')[0]}</span>
-                        {item.includes('(') && (
+                        <span>{item.name}</span>
+                        {item.shortcut && (
                           <span className="text-[10px] text-slate-500 font-mono">
-                            {item.split('(')[1].replace(')', '')}
+                            {item.shortcut}
                           </span>
                         )}
                       </button>
@@ -108,8 +179,16 @@ export const Header: React.FC<HeaderProps> = ({ onOpenAuthModal }) => {
 
       {/* Center: Workspace Folder & Active File Title Bar */}
       <div className="flex items-center gap-1.5 text-[12px] text-[#999999] truncate font-sans max-w-[40%] justify-center">
-        <span className="truncate hover:text-white cursor-pointer transition">
-          New folder (2) &nbsp;—&nbsp; Antigravity IDE &nbsp;—&nbsp; {activeFile ? activeFile.name : 'models.ts'}
+        <span
+          onClick={openLocalFolder}
+          className="truncate hover:text-white cursor-pointer transition flex items-center gap-1"
+          title="Click to Open Local Folder from PC"
+        >
+          <span className="font-semibold text-white">{workspaceName}</span>
+          <span>—</span>
+          <span>Antigravity IDE</span>
+          <span>—</span>
+          <span className="text-cyan-300">{activeFile ? activeFile.name : 'models.ts'}</span>
         </span>
       </div>
 
@@ -145,7 +224,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenAuthModal }) => {
             className={`p-1 rounded hover:bg-[#2a2a2a] transition ${
               isRightAssistantOpen ? 'text-cyan-400' : 'text-[#858585] hover:text-white'
             }`}
-            title="Toggle Antigravity AI Assistant & Swarm"
+            title="Toggle Antigravity Dual AI Assistant & Swarm"
           >
             <PanelRight className="w-3.5 h-3.5" />
           </button>
